@@ -82,7 +82,7 @@
 		function timeStroker(){
 		
 		var currentDate = new Date();	
-		var currentDateSeconds = currentDate.getSeconds() + getRandomInt(10);
+		var currentDateSeconds = currentDate.getSeconds() + getRandomInt(5);
 			
 		for (var i = 0; i < activeStroker.length; i++){
 			
@@ -93,6 +93,20 @@
 		}
 		}
 		
+		
+	var someNumbers = [17,82,9,500,40,606,202];	
+		
+		smallNumbers = someNumbers.filter(
+		function(el){return el <=40 ? this : null});
+		
+		coolNumbers = someNumbers.filter(
+		function(el){return el >=200 });
+		
+		d3.select("body").selectAll("div")
+		.data(coolNumbers)
+		.enter()
+		.append("div")
+		.html(function (d) {return d});
 		
 	</script>
 	
