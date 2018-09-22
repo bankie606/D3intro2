@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+	<head>
+		<title>D3 Streamgraph Example </title>
+		<meta charset="utf-8"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.8/d3.min.js" type="text/Javascript"></script>
+	</head>
+<body>
+	
+	<svg style="width: 600px; height:600px;border:4px groove black;">
+	</svg>
+	
+	<div>
+	</div>
+	
+	<script>
+		d3.csv("moviedata.csv", streamGraph);
+
+			var xScale = d3.scaleLinear().domain([1,8]).range([20,470]);
+		var yScale = d3.scaleLinear().domain([0,100]).range([480,20]);
+			
+			
+			xAxis = d3.axisBottom()
+			.scale(xScale)
+			.tickSize(480)
+			
+			d3.select("svg").append("g").attr("id", "xAxisG").call(xAxis);
+			
+			yAxis = d3.axisRight()
+				.scale(yScale)
+				.ticks(10)
+				.tickSize(480);
+		
+		
+		function streamGraph(data){
+			
+			
+			
+			
+	
+			
+			d3.select("svg").append("g").attr("id", "yAxisG").call(yAxis);
+		
+			
+			var fillScale = d3.scaleLinear().domain([0,5]).range(["green", "black"]);
+				
+			var n = 0;
+				
+			
+			
+		for (x in data[0]){
+			if (x !="day"){
+			
+				var movieArea = d3.area()
+				.x(function (d){
+						return xScale(d.day);
+					})
+				.y(function (d){
+					return yScale(alternateStacking(d,x,"top"));
+				})
+				.y1(function (d){
+					return yScale(alternateStacking(d,x,"bottom"));
+				})
+				.curve(d3.curveBasis);
+				
+				
+				d3.select("svg")
+				.append("path")
+				.style("id", x + "Area")
+				.attr("d", movieArea(data))
+				.attr("fill", fillScale(n))
+				.attr("stroke", "blue")
+				.attr("stroke-width", 2)
+				.style("opacity", .5);
+				
+				n++;
+				
+				
+				
+			};
+			};
+
+			
+		function simpleStacking( incomingData, incomingAttribute) {
+		
+			var newHeight = 0;
+			for (x in incomingData){
+				if (x != "day"){
+				newHeight += parseInt (incomingData[x]);
+					if (x == incomingAttribute){
+					break;
+					}	
+				}
+			}
+			return newHeight;
+		}
+				
+				
+				function alternateStacking (incomingData, incomingAttribute, topBottom){
+				
+					var newHeight = 0;
+					var skip = true;
+					for (x in incomingData){
+					
+						if (x != "day"){
+							if (x == "movie1" || skip == false){
+							newHeight += parseInt(incomingData[x]);
+								if (x == incomingAttribute){
+								break;
+								}
+							
+							if (skip == false){
+							 skip == true;
+							}else{
+								n%2 == 0 ? skip = false : skip = true;
+							}
+						}
+							else{
+							skip = false;
+							}
+						}
+					
+					}
+					if (topBottom == "bottom"){
+						newHeight = -newHeight;
+					}
+					if ( n > 1 && n%2 == 1 && topBottom == "bottom"){
+						newHeight = 0;
+					}
+					if (n > 1 && n%2 == 0 && topBottom == "top"){
+						newHeight = 0;
+					}
+					return newHeight;
+					
+				
+				}
+			
+		
+		}
+		
+		
+		
+	</script>
+	
+	
+	
+</body>
+</html>
+	
+	

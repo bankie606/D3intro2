@@ -1,0 +1,11 @@
+/*style sheet for chapter4 scatterplot */
+
+line {
+shape-rendering: crispEdges;
+stroke: #000;
+}
+
+path.domain{
+fill:none;
+stroke:black;
+}
