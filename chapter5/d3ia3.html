@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+	<head>
+		<title>D3 Piechart Example </title>
+		<meta charset="utf-8"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.8/d3.min.js" type="text/Javascript"></script>
+		</head>
+<body>
+	<svg style="width: 600px; height:600px;border:4px groove black;">
+	</svg>
+	
+<script>
+	d3.json("alltweets.json", function (error, data) {packingChart (data)});
+		
+		
+		
+		function packingChart(data) {
+		
+	var nestedTweets = d3.nest().key(function (el){
+		return  el.user;
+		
+	}).entries(data.tweets);
+	
+	var packableTweets = {id: "All Tweets", values: nestedTweets};
+	
+	var depthScale = d3.scale.category10([0,1,2,]);
+	
+	var packChart = d3.pack();
+	
+	packChart.size([500,500])
+		.children(function (d){ 
+		return d.values;
+	})
+	.value(function(d){
+		return 1;
+	});
+			
+	d3.select("svg")
+			.selectAll("circle")
+			.data(packChart(packableTweets))
+			.enter()
+			.append("circle")
+			.attr("r", function(d) {return d.r;})
+			.attr("cx", function(d) {return d.x;})
+			.attr("cy", function(d) {return d.y;})
+			.style("fill", function(d) {return depthScale (d.depth); })
+			.stlye("stroke", "black")
+			.stlye("stroke-width", "2px");
+				  
+	
+	
+		}
+	
+	
+</script>
+	
+	
+</body>
+	
+</html>
+	

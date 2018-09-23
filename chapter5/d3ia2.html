@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+	<head>
+		<title>D3 Piechart Example </title>
+		<meta charset="utf-8"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.8/d3.min.js" type="text/Javascript"></script>
+		</head>
+<body>
+	<svg style="width: 600px; height:600px;border:4px groove black;">
+	</svg>
+	<button id="tweets" value="tweets"> Tweet Data</button>
+	<button id="favorites" value="favorite">Favorites Data</button>
+	<button id="retweets" value="retweets">Retweets Data</button>
+	<script>
+	
+		d3.json("tweets.json", function (error, data) {pieChart (data)});
+		
+		
+		
+		function pieChart(data) {
+		
+			var nestedTweets = d3.nest().key(d => d.user).entries(data.tweets);
+			
+		nestedTweets.forEach(d => {
+          d.numTweets = d.values.length;
+          d.numFavorites = d3.sum(d.values, p => p.favorites.length);
+          d.numRetweets = d3.sum(d.values, p => p.retweets.length);
+        });
+		
+		var pieChart = d3.pie();
+		
+			pieChart.sort(null);
+			
+		var newArc = d3.arc();
+		newArc.innerRadius(10).outerRadius(100);
+		
+			
+		pieChart.value(d=>d.numTweets);
+			
+		var yourPie = pieChart(nestedTweets);
+			
+			console.log(yourPie);
+			
+
+		d3.select("svg")
+			.append("g")
+			.attr("transform","translate(250,250)")
+			.selectAll("path")
+			.data(yourPie)
+			.enter()
+			.append("path")
+			.attr("d", newArc)
+			.style("fill", "green")
+			.style("opacity", .5)
+			.style("stroke", "black")
+			.style("stroke-width", "2px")
+			.each(function (d) {this._current = d;});
+			
+		
+		document.getElementById("favorites").addEventListener("click", favoriteTweets);
+		document.getElementById("tweets").addEventListener("click", defaultTweets);
+		document.getElementById("retweets").addEventListener("click", retweets);	
+			
+			
+			
+			function favoriteTweets(){
+			
+			pieChart.value(d => d.numFavorites);		
+				d3.selectAll("path").data(pieChart(nestedTweets)).transition().duration(1000).attr("d", newArc);
+			}
+			
+			function defaultTweets(){
+			
+				
+			pieChart.value(d => d.numTweets);
+				d3.selectAll("path").data(pieChart(nestedTweets)).transition().duration(1000).attr("d", newArc);
+			}
+			
+			function retweets(){
+			
+			pieChart.value(d => d.numRetweets);
+				
+				//d3.selectAll("path").data(pieChart(nestedTweets)).transition().duration(1000).attr("d", newArc);
+				d3.selectAll("path").data(pieChart(nestedTweets.filter(function (d){
+					return d.numTweets > 0;
+					})), function (d) {
+					return d.data.key;
+				}
+										  ).exit().remove();
+				
+				d3.selectAll("path").data(pieChart(nestedTweets
+												   .filter(function(d){return d.numRetweets >0;})),
+										  function (d){ return d.data.key})
+					.transition()
+					.duration(1000)
+					.attrTween("d",arcTween);
+				
+				function arcTween(a){
+					var i = d3.interpolate(this._current, a);
+					this._current = i(0);
+					return function(t){
+					return newArc(i(t));
+					};
+				}
+			}
+			
+			
+		
+		}
+		</script>
+		
+</body>
+</html>
