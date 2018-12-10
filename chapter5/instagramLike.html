@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<head>
+<title>D3 Tree Example</title>
+<meta charset="utf-8"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.8/d3.min.js" type="text/Javascript"></script>
+	</head>
+<body>
+	<style>
+		g.node text:hover{
+		font-size:36px;
+		
+		animation: coolShaker infinite 3s;	
+		}
+		
+		@keyframes coolShaker{
+		
+			0%{transform: skewX(0deg);}
+			50%{transform: skewX(10deg);}
+			75%{transform: skewX(-10deg);}
+			100%{transform: skewX(2deg);}
+		}
+	
+	</style>
+	
+			<svg style="width: 100%; height:1800px;border:4px groove black;">
+	</svg>
+	
+	<script>
+		d3.json("/chapter5/commentlikes.json", dataViz);
+		
+		function dataViz(data){
+			var depthScale = d3.scaleOrdinal().range([ "#5EAFC6", "#FE9922","#93c464","#75739F"])
+			
+			console.log(data);
+			var nestedLikes = d3.nest()
+			.key(d=> d.user)
+			.entries(data.comment_likes);
+			
+			var packableTweets = {id: "All Comment Likes", values: nestedLikes};
+			var packChart = d3.pack();
+			
+			packChart.size([500,500]).padding(10)
+			
+			var root = d3.hierarchy(packableTweets, d=> d.values).sum( d => d.user ? d.user.length + d.timestamp.length + 1 : undefined)
+		
+			var treeChart = d3.tree();
+			
+			treeChart.size([1700,1000])
+			
+			
+			var treeData = treeChart(root).descendants()
+			
+		
+			
+			d3.select("svg")
+			.append("g")
+			.attr("id", "treeG")
+			.attr("transform", "translate(60,20)")
+			.selectAll("g")
+			.data(treeData)
+			.enter()
+			.append("g")
+			.attr("class","node")
+			.attr("transform", d=> `translate(${d.y},${d.x})`)
+		
+			
+			d3.selectAll("g.node")
+			.append("circle")
+			.attr("r", 10)
+			.style("fill", d=> depthScale(d.depth))
+			.style("padding","10px")	
+			.style("stroke", "#f6f6f6")
+			.style("stroke-width", "2px");
+			
+			d3.select("#treeG").selectAll("line")
+			.data(treeData.filter(d=>d.parent))
+			.enter().insert("line", "g")
+			.attr("x1", d=> d.parent.y)
+			.attr("y1", d=> d.parent.x)
+			.attr("x2", d=> d.y)
+			.attr("y2", d=> d.x)
+			.attr("padding", "10px")
+			.style("stroke", "red");
+			
+			
+			d3.selectAll("g.node")
+			.append("svg:title")
+   			.text(d => d.data.id || d.data.key || d.data.content)
+		
+			
+			
+			d3.selectAll("g.node")
+			.append("text")
+			.style("text-anchor", "middle")
+			.style("fill", "#4f442b")
+			.text(d => d.data.id || d.data.key || d.data.content)
+			
+		
+			d3.selectAll("g.node").on("mouseover", count_leaves);
+			function displayLikeNums(d)
+			{
+			var likeNumb = d3.selectAll("g.child").count;
+				console.log(likeNumb);
+			}
+			
+			
+			var count;
+
+				function count_leaves(node){
+					console.log(node);
+    			if(node.children){
+        		//go through all its children
+        	for(var i = 0; i<node.children.length; i++){
+            //if the current child in the for loop has children of its own
+            //call recurse again on it to decend the whole tree
+            if (node.children[i].children){
+                count_leaves(node.children[i]);
+            }
+            //if not then it is a leaf so we count it
+            else{
+                count++;
+				console.log(count);
+            }
+        }
+    }
+			
+				}
+		}
+		
+	
+	</script>
+	
+	
+	</body>
+	
+	</html>

@@ -74,9 +74,11 @@
 				.on("click", d === root ?
 					p => filterTreemap(p) : () => filterTreemap(root))
 				.transition()
-				.duration()
+				.duration(1000)
 				.attr("x", p=>p.x0)
-				
+				.attr("y", p=>p.y0)
+				.attr("width", p=> p.x1 - p.x0)
+				.attr("height", p=> p.y1 - p.y0)
 				
 		
 				
